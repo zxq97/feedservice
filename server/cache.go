@@ -43,7 +43,9 @@ func cacheSetFeed(ctx context.Context, key string, feedMap map[int64]int64) erro
 			Score:  float64(v),
 		})
 	}
+	global.DebugLog.Printf("ctx %v key %v feedmap %v", ctx, key, feedMap)
 	err := redisCli.ZAdd(ctx, key, zs...).Err()
+	global.DebugLog.Printf("ctx %v err %v", ctx, err)
 	if err != nil {
 		global.ExcLog.Printf("ctx %v cacheSetFeed key %v feedmap %v err %v", ctx, key, feedMap, err)
 		return err
