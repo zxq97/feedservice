@@ -23,8 +23,8 @@ func getSelfFeed(ctx context.Context, uid, cursor, offset int64) ([]int64, int64
 			_ = cacheSetFeed(ctx, key, feedMap)
 		})
 		if len(ids) > int(offset) {
-			ids = ids[:offset]
 			nextCur = ids[offset]
+			ids = ids[:offset]
 		}
 	}
 	return ids, nextCur, nil
