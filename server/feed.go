@@ -8,7 +8,7 @@ import (
 
 func getSelfFeed(ctx context.Context, uid, cursor, offset int64) ([]int64, int64, error) {
 	key := fmt.Sprintf(RedisKeyZInBox, uid)
-	ids, nextCur, err := cacheGetFeed(ctx, key, cursor, offset)
+	ids, hasMore, err := cacheGetFeed(ctx, key, cursor, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -23,9 +23,13 @@ func getSelfFeed(ctx context.Context, uid, cursor, offset int64) ([]int64, int64
 			_ = cacheSetFeed(ctx, key, feedMap)
 		})
 		if len(ids) > int(offset) {
-			nextCur = ids[offset]
 			ids = ids[:offset]
+			hasMore = true
 		}
+	}
+	var nextCur int64
+	if hasMore {
+		nextCur = cursor + offset
 	}
 	return ids, nextCur, nil
 }
@@ -37,7 +41,7 @@ func pushSelfFeed(ctx context.Context, uid, articleID int64) error {
 
 func getFollowFeed(ctx context.Context, uid, cursor, offset int64) ([]int64, int64, error) {
 	key := fmt.Sprintf(RedisKeyZOutBox, uid)
-	ids, nextCur, err := cacheGetFeed(ctx, key, cursor, offset)
+	ids, hasMore, err := cacheGetFeed(ctx, key, cursor, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -51,7 +55,11 @@ func getFollowFeed(ctx context.Context, uid, cursor, offset int64) ([]int64, int
 			_ = cacheSetFeed(ctx, key, feedMap)
 		})
 		ids = ids[:offset]
-		nextCur = ids[offset]
+		hasMore = true
+	}
+	var nextCur int64
+	if hasMore {
+		nextCur = cursor + offset
 	}
 	return ids, nextCur, nil
 }

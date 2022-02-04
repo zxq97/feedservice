@@ -15,22 +15,24 @@ const (
 	RedisKeyZOutBox = "feed_service_out_box_%v"
 )
 
-func cacheGetFeed(ctx context.Context, key string, cursor, offset int64) ([]int64, int64, error) {
+func cacheGetFeed(ctx context.Context, key string, cursor, offset int64) ([]int64, bool, error) {
 	val, err := redisCli.ZRevRange(ctx, key, cursor, cursor+offset).Result()
 	if err != nil && err != redis.Nil {
 		global.ExcLog.Printf("ctx %v cacheGetFeed key %v cursor %v err %v", ctx, key, cursor, err)
-		return nil, 0, err
+		return nil, false, err
 	}
 	ids := make([]int64, 0, offset)
-	var nextCur int64
+	var hasMore bool
+	if len(val) > int(offset) {
+		hasMore = true
+	}
 	for _, v := range val {
-		nextCur = cast.ParseInt(v, 0)
 		if len(ids) == int(offset) {
 			break
 		}
-		ids = append(ids, nextCur)
+		ids = append(ids, cast.ParseInt(v, 0))
 	}
-	return ids, nextCur, nil
+	return ids, hasMore, nil
 }
 
 func cacheSetFeed(ctx context.Context, key string, feedMap map[int64]int64) error {
