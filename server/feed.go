@@ -22,8 +22,10 @@ func getSelfFeed(ctx context.Context, uid, cursor, offset int64) ([]int64, int64
 		concurrent.Go(func() {
 			_ = cacheSetFeed(ctx, key, feedMap)
 		})
-		ids = ids[:offset]
-		nextCur = ids[offset]
+		if len(ids) > int(offset) {
+			ids = ids[:offset]
+			nextCur = ids[offset]
+		}
 	}
 	return ids, nextCur, nil
 }
