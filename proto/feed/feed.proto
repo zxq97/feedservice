@@ -1,0 +1,47 @@
+syntax = "proto3";
+package feed;
+option go_package = "rpc/feed/pb;feed_service";
+
+message ReFreshRequest {
+  int64 uid = 1;
+}
+
+message GetFeedRequest {
+  int64 uid = 1;
+  int64 cursor = 2;
+  int64 offset = 3;
+}
+
+message GetFeedResponse {
+  repeated int64 article_ids = 1;
+  int64 next_cursor = 2;
+}
+
+message PushSelfFeedRequest {
+  int64 uid = 1;
+  int64 article_id = 2;
+}
+
+message PushFollowFeedRequest {
+  repeated int64 uids = 1;
+  int64 uid = 2;
+  int64 article_id = 3;
+}
+
+message ActionFeedRequest {
+  int64 uid = 1;
+  int64 to_uid = 2;
+}
+
+message EmptyResponse {
+}
+
+service FeedServer {
+  rpc Refresh(ReFreshRequest) returns (EmptyResponse);
+  rpc GetSelfFeed(GetFeedRequest) returns (GetFeedResponse);
+  rpc PushSelfFeed(PushSelfFeedRequest) returns (EmptyResponse);
+  rpc GetFollowFeed(GetFeedRequest) returns (GetFeedResponse);
+  rpc PushFollowFeed(stream PushFollowFeedRequest) returns (EmptyResponse);
+  rpc FollowAfterFeed(ActionFeedRequest) returns (EmptyResponse);
+  rpc UnfollowAfterFeed(ActionFeedRequest) returns (EmptyResponse);
+}

@@ -1,0 +1,31 @@
+syntax = "proto3";
+package remind;
+option go_package = "rpc/remind/pb;remind_service";
+
+message RemindInfo {
+  int64 uid = 1;
+  int32 remind_type = 2;
+}
+
+message RemindRequest {
+  RemindInfo remind_info = 1;
+}
+
+message RemindBatchRequest {
+  repeated int64 uids = 1;
+  int32 remind_type = 2;
+}
+
+message CheckResponse {
+  bool unread = 1;
+}
+
+message EmptyResponse {
+}
+
+service RemindServer {
+  rpc AddUnread(RemindInfo) returns (EmptyResponse);
+  rpc AddBatchUnread(RemindBatchRequest) returns (EmptyResponse);
+  rpc DeleteUnread(RemindInfo) returns (EmptyResponse);
+  rpc CheckUnread(RemindInfo) returns (CheckResponse);
+}
